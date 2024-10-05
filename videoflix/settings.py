@@ -26,7 +26,11 @@ SECRET_KEY = 'django-insecure-i$!@0i3b6v%-sx9&ofsfddvsm694fgtt3t%66r5au3@%cl1_uo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['gruppe-49408.developerakademie.org']
+ALLOWED_HOSTS = [
+    'gruppe-49408.developerakademie.org',
+    'localhost', 
+    '127.0.0.1'
+    ]
 
 
 # Application definition
@@ -45,7 +49,6 @@ INSTALLED_APPS = [
     'import_export',
     'user',
 ]
-
 
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
