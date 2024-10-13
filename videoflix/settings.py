@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -29,6 +28,8 @@ DEBUG = True
 ALLOWED_HOSTS = ['gruppe-49408.developerakademie.org', '127.0.0.1', 'localhost', 'http://localhost:4200']
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+CSRF_TRUSTED_ORIGINS = ['https://gruppe-49408.developerakademie.org']
 
 CORS_ALLOW_METHODS = ['*']
 
@@ -48,15 +49,13 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_rq',
     'import_export',
-    'user',
     'corsheaders',
     'rest_framework.authtoken',
 ]
 
-
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 
-# DEBUG = True
+DEBUG = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'videoflix/static/staticfiles/')
 
@@ -74,20 +73,19 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'videoflix.urls'
 
-CACHES = {    
-        'default': {        
-            'BACKEND': 'django_redis.cache.RedisCache',        
-            'LOCATION': 'redis://127.0.0.1:6379/1',        
-            'OPTIONS': {   
-                'PASSWORD': 'foobared',        
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient'
-            },        
-            'KEY_PREFIX': 'videoflix'    
-    }
-}
+# CACHES = {    
+#        'default': {        
+#            'BACKEND': 'django_redis.cache.RedisCache',        
+#            'LOCATION': 'redis://127.0.0.1:6379/1',        
+#            'OPTIONS': {   
+#                'PASSWORD': 'foobared',        
+#                'CLIENT_CLASS': 'django_redis.client.DefaultClient'
+#            },        
+#            'KEY_PREFIX': 'videoflix'    
+#    }
+# }
 
 CACHE_TTL = 60 * 15
-
 
 INTERNAL_IPS = [
     '127.0.0.1',
@@ -96,7 +94,7 @@ INTERNAL_IPS = [
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'videoflix_app/templates'),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -111,14 +109,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'videoflix.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.sqlite3',
-        #'NAME': BASE_DIR / 'db.sqlite3',
 	'ENGINE': 'django.db.backends.postgresql',
 	'NAME': 'videoflix',
 	'USER': 'postgres',
@@ -128,7 +123,15 @@ DATABASES = {
     }
 }
 
-
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'w01f1689.kasserver.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'noreply@lukas-nolting.de'
+EMAIL_HOST_PASSWORD = 'SQvDPA8E7muJAes3a6jz'
+DEFAULT_FROM_EMAIL = 'noreply@lukas-nolting.de'
+DOMAIN_NAME = 'http://localhost:8000'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -148,7 +151,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -160,7 +162,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
@@ -171,13 +172,12 @@ STATIC_URL = 'videoflix/static/staticfiles/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 RQ_QUEUES = {
     'default': {
         'HOST': 'localhost',
         'PORT': 6379,
         'DB': 0,
-        'PASSWORD': 'foobared',
+#        'PASSWORD': 'foobared',
         'DEFAULT_TIMEOUT': 360,
     },
 }
@@ -185,10 +185,12 @@ RQ_QUEUES = {
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-        # Weitere Authentifizierungsklassen...
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-        # Weitere Berechtigungsklassen...
     ),
 }
+
+#media settings
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
