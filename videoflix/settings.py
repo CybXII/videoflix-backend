@@ -29,7 +29,7 @@ ALLOWED_HOSTS = ['gruppe-49408.developerakademie.org', '127.0.0.1', 'localhost',
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-CSRF_TRUSTED_ORIGINS = ['https://gruppe-49408.developerakademie.org']
+CSRF_TRUSTED_ORIGINS = ['https://gruppe-49408.developerakademie.org','http://localhost:4200']
 
 CORS_ALLOW_METHODS = ['*']
 
