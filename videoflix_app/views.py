@@ -1,3 +1,4 @@
+import json
 import time
 from django.urls import reverse
 from django.conf import settings
@@ -32,6 +33,8 @@ User = get_user_model()
 # @cache_page(CACHETTL)
 
 class VideoView(View):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         videos = Video.objects.all()
         video_list = list(videos.values())
@@ -226,3 +229,17 @@ def user_continue_watching(request):
             return Response({"message": "Video removed from continue watching."}, status=status.HTTP_204_NO_CONTENT)
         except UserContinueWatchVideo.DoesNotExist:
             return Response({"error": "Video not found in continue watching."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class VerifyTokenView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        frontend_token = request.data.get('token')
+        user_token = request.auth
+        
+        if frontend_token == str(user_token):
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
