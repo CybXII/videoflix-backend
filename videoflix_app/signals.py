@@ -16,9 +16,11 @@ import django_rq
 from django.core.files.base import ContentFile
 import threading
 import logging
-from videoflix_app.tasks import convert_video
 from .models import Video
 from rest_framework.authtoken.models import Token
+import shutil
+
+
 
 logger = logging.getLogger(__name__)
 User = get_user_model() 
@@ -30,17 +32,11 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 
 @receiver(post_save, sender=User) 
 def send_activation_email_v2(sender, instance, created, **kwargs):
-    print("Mail Test signals.py")
     if created and not instance.is_active:
-        print(instance)
         token = token_generator.make_token(instance)
-        print(token)
         uid = urlsafe_base64_encode(force_bytes(instance.pk))
-        print(uid)
         activation_url = reverse('activate_user', kwargs={'uidb64': uid, 'token': token})
-        print(activation_url)
         full_url = f'{settings.DOMAIN_NAME}{activation_url}'
-        print(full_url)
         text_content = render_to_string(
             "emails/activation_email.txt",
             context={'user': instance, 'activation_url': full_url},
@@ -56,7 +52,6 @@ def send_activation_email_v2(sender, instance, created, **kwargs):
             settings.DEFAULT_FROM_EMAIL,
             [instance.email],
         )
-        print(msg)
         msg.attach_alternative(html_content, "text/html")
         msg.send()
 
@@ -75,7 +70,6 @@ def video_post_save(sender, instance, created, **kwargs):
     """
     print('Video received')
     if created:
-        print('New video was created')
         thread = threading.Thread(target=process_video, args=(instance,))
         thread.start()
         # RQ-Worker anstatt thread
@@ -84,9 +78,8 @@ def video_post_save(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Video)
 def video_post_delete(sender, instance, **kwargs):
     print('Video will be deleted')
-    if instance.video_file:
-        if os.path.isfile(instance.video_file.path):
-            os.remove(instance.video_file.path)
-            print('Video was deleted')
-#todo: delete whole folder and thumbnail
+    folder_path = os.path.dirname(instance.video_file.path)
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)
+        print(f'Folder {folder_path} was deleted')
 
