@@ -1,7 +1,9 @@
+import re
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
-import re
+
 
 def clean_filename(title):
     return re.sub(r'[^a-zA-Z0-9_]+', '_', title)
@@ -14,7 +16,6 @@ def video_file_path(instance, filename):
 
 class Video(models.Model):
         CATEGORY_CHOICES = [
-        ('sci-fi', 'Sci-Fi'),
         ('horror', 'Horror'),
         ('action', 'Action'),
         ('drama', 'Drama'),

@@ -1,3 +1,9 @@
+import os
+from dotenv import load_dotenv
+import logging
+import shutil
+import threading
+
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.mail import EmailMultiAlternatives
@@ -6,21 +12,18 @@ from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.conf import settings
+from django.contrib.auth import get_user_model, tokens
 from django.contrib.auth.tokens import default_token_generator as token_generator
-from django.contrib.auth import get_user_model 
-import os
-from videoflix_app.tasks import process_video
-import logging
-from django.core.mail import EmailMultiAlternatives
-import django_rq
 from django.core.files.base import ContentFile
-import threading
-import logging
-from .models import Video
+
+from django_rq import job, get_queue
+
 from rest_framework.authtoken.models import Token
-import shutil
 
+from videoflix_app.tasks import process_video
+from .models import Video
 
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 User = get_user_model() 
@@ -37,13 +40,14 @@ def send_activation_email_v2(sender, instance, created, **kwargs):
         uid = urlsafe_base64_encode(force_bytes(instance.pk))
         activation_url = reverse('activate_user', kwargs={'uidb64': uid, 'token': token})
         full_url = f'{settings.DOMAIN_NAME}{activation_url}'
+        domain_url = os.getenv('REDIRECT_LANDING')
         text_content = render_to_string(
             "emails/activation_email.txt",
-            context={'user': instance, 'activation_url': full_url},
+            context={'user': instance, 'activation_url': full_url, 'domain_url': domain_url},
         )
         html_content = render_to_string(
             "emails/activation_email.html",
-            context={'user': instance, 'activation_url': full_url},
+            context={'user': instance, 'activation_url': full_url, 'domain_url': domain_url},
         )
         subject = 'Confirm your email'
         msg = EmailMultiAlternatives(
@@ -57,23 +61,9 @@ def send_activation_email_v2(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Video)
 def video_post_save(sender, instance, created, **kwargs):
-    """
-    Starts a new thread to convert and create a thumbnail for a video when it is saved for the first time.
-
-    This receiver is connected to the post_save signal of the Video model. When a new video is saved, it starts a new
-    thread which calls the process_video_and_thumbnail function with the instance of the video as argument.
-
-    :param sender: The sender of the signal, usually the Video model
-    :param instance: The instance of the Video model that was saved
-    :param created: A boolean indicating whether the instance was created or updated
-    :param kwargs: Additional keyword arguments
-    """
-    print('Video received')
     if created:
-        thread = threading.Thread(target=process_video, args=(instance,))
-        thread.start()
-        # RQ-Worker anstatt thread
-        
+        queue = get_queue('default')
+        queue.enqueue(process_video, instance)
 
 @receiver(post_delete, sender=Video)
 def video_post_delete(sender, instance, **kwargs):

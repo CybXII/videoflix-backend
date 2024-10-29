@@ -1,5 +1,9 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+import json
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -8,16 +12,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-i$!@0i3b6v%-sx9&ofsfddvsm694fgtt3t%66r5au3@%cl1_uo'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['gruppe-49408.developerakademie.org', '127.0.0.1', 'localhost', 'http://localhost:4200']
+ALLOWED_HOSTS = json.loads(os.getenv('ALLOWED_HOSTS', '[]'))
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
-CSRF_TRUSTED_ORIGINS = ['https://gruppe-49408.developerakademie.org','http://localhost:4200']
+CORS_ALLOWED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
+
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = json.loads(os.getenv('CSRF_TRUSTED_ORIGINS', '[]'))
 
 CORS_ALLOW_METHODS = ['*']
 
@@ -57,22 +65,22 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'videoflix_app.middleware.LogIPMiddleware',
 ]
 
 ROOT_URLCONF = 'videoflix.urls'
 
-# todo fix redis/ use cache 
-# CACHES = {    
-#        'default': {        
-#            'BACKEND': 'django_redis.cache.RedisCache',        
-#            'LOCATION': 'redis://127.0.0.1:6379/1',        
-#            'OPTIONS': {   
-#                'PASSWORD': 'foobared',        
-#                'CLIENT_CLASS': 'django_redis.client.DefaultClient'
-#            },        
-#            'KEY_PREFIX': 'videoflix'    
-#    }
-# }
+CACHES = {    
+       'default': {        
+           'BACKEND': 'django_redis.cache.RedisCache',        
+           'LOCATION': os.getenv('REDIS_URL'),        
+           'OPTIONS': {   
+               'PASSWORD': os.getenv('REDIS_PASSWORD'),        
+               'CLIENT_CLASS': 'django_redis.client.DefaultClient'
+           },        
+           'KEY_PREFIX': 'videoflix'    
+   }
+}
 
 CACHE_TTL = 60 * 15
 
@@ -104,23 +112,26 @@ WSGI_APPLICATION = 'videoflix.wsgi.application'
 DATABASES = {
     'default': {
 	'ENGINE': 'django.db.backends.postgresql',
-	'NAME': 'videoflix',
-	'USER': 'postgres',
-	'PASSWORD': '49408',
-	'HOST': 'localhost',
-	'PORT': '5432',
+	'NAME': os.getenv('DATABASE_NAME'),
+	'USER': os.getenv('DATABASE_USER'),
+	'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+	'HOST': os.getenv('DATABASE_HOST'),
+	'PORT': os.getenv('DATABASE_PORT'),
+    'OPTIONS': {
+        'client_encoding': 'UTF8',
+        },
     }
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'w01f1689.kasserver.com'
-EMAIL_PORT = 587
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'noreply@lukas-nolting.de'
-EMAIL_HOST_PASSWORD = 'SQvDPA8E7muJAes3a6jz'
-DEFAULT_FROM_EMAIL = 'noreply@lukas-nolting.de'
-DOMAIN_NAME = 'http://localhost:8000'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+DOMAIN_NAME = os.getenv('DOMAIN_NAME')
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -163,13 +174,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 RQ_QUEUES = {
     'default': {
-        'HOST': 'localhost',
-        'PORT': 6379,
+        'HOST': os.getenv('RQ_HOST'),
+        'PORT': os.getenv('RQ_PORT'),
         'DB': 0,
-#        'PASSWORD': 'foobared',
-        'DEFAULT_TIMEOUT': 360,
-    },
+        'PASSWORD': os.getenv('RQ_PASSWORD'),  
+        'DEFAULT_TIMEOUT': 1000,  
+    }
 }
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -183,3 +195,23 @@ REST_FRAMEWORK = {
 #media settings
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'videoflix_app.middleware': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
