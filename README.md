@@ -20,74 +20,116 @@ git branch -M main
 git push -uf origin main
 ```
 
-## Integrate with your tools
+Videoflix Backend Server Setup Instructions
 
-- [ ] [Set up project integrations](https://gitlab.com/videoflix-49808/videoflix_backend/-/settings/integrations)
+1. Install ffmpeg
+   sudo apt-get install ffmpeg
 
-## Collaborate with your team
+2. Install nginx
+   sudo apt-get install nginx
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+3. Configure SSH Key for GitLab Access
+   Generate an SSH key to authenticate with GitLab. Replace example@example.com with your email.
+   cd /etc/ssh
+   ssh-keygen -t rsa -b 4096 -C "example@example.com"  # Press Enter through all prompts
+   cat /root/.ssh/id_rsa.pub  # Display the SSH key to add to GitLab
 
-## Test and Deploy
+4. Clone the Repository
+   In your home directory, clone the repository.
+   git clone git@gitlab.com:videoflix-49808/videoflix_backend.git
 
-Use the built-in continuous integration in GitLab.
+5. Connect via SFTP with FileZilla
+   - Protocol: SFTP
+   - Host: 192.168.1.100 (replace with your server's IP)
+   - User: root
+   - Password: Server password  
+   OR configure private key for SSH:
+     - Open FileZilla Settings > SFTP and add the private key.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+6. Upload .env File
+   Copy the .env file from your local videoflix_backend project to the server via SFTP.
 
-***
+7. Update IP in .env File
+   Open .env on the server and update the hostname to the server IP.
+   nano /home/videoflix_backend/.env  # Replace IP as necessary
 
-# Editing this README
+8. Install PostgreSQL
+   sudo apt install postgresql postgresql-contrib
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+9. Configure PostgreSQL User
+   Login to PostgreSQL and set the password for the postgres user.
+   sudo -i -u postgres
+   psql
+   ALTER USER postgres WITH PASSWORD 'examplepassword';  # Replace with your password
+   CREATE DATABASE videoflix;  # Create the Videoflix database
+   \q  # Exit PostgreSQL console
+   exit  # Exit postgres user
 
-## Suggestions for a good README
+10. Setup Python Virtual Environment
+   apt install python3.12-venv
+   python3 -m venv /home/videoflix_backend/env  # Create virtual environment in project directory
+   source /home/videoflix_backend/env/bin/activate  # Activate virtual environment
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+11. Install Requirements
+   Edit requirements.txt and install dependencies.
+   nano requirements.txt  # Remove problematic lines if necessary
+   pip install -r requirements.txt
 
-## Name
-Choose a self-explaining name for your project.
+12. Migrate Database
+   python3 manage.py makemigrations
+   python3 manage.py migrate
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+13. Update PostgreSQL Configuration for External Access
+   Edit PostgreSQL configuration files.
+   sudo nano /etc/postgresql/*/main/postgresql.conf  # Uncomment listen_addresses = '*'
+   sudo nano /etc/postgresql/16/main/pg_hba.conf  # Add at the end:
+   # host    videoflix       postgres        0.0.0.0/0               md5
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+14. Restart PostgreSQL
+   sudo systemctl restart postgresql
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+15. Install and Configure SSL with Certbot
+   sudo systemctl stop nginx
+   sudo certbot certonly --standalone -d example-backend.com -d www.example-backend.com
+   # Update nginx config with SSL details from Certbot
+   sudo systemctl start nginx
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+16. Install and Configure Supervisor for Background Tasks
+   sudo apt update
+   sudo apt install supervisor
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+   Edit configuration for rqworker:
+   sudo nano /etc/supervisor/conf.d/rqworker.conf
+   # Add:
+   # [program:rqworker]
+   # command=/home/videoflix_backend/env/bin/python /home/videoflix_backend/manage.py rqworker
+   # process_name=%(program_name)s_%(process_num)02d
+   # numprocs=3
+   # autostart=true
+   # autorestart=true
+   # stdout_logfile=/var/log/rqworker.log
+   # stderr_logfile=/var/log/rqworker_err.log
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+   Reload and start Supervisor services.
+   sudo supervisorctl reread
+   sudo supervisorctl update
+   sudo supervisorctl start rqworker
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+17. Configure Gunicorn with Supervisor
+   sudo nano /etc/supervisor/conf.d/gunicorn.conf
+   # Add:
+   # command=/home/videoflix_backend/env/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 videoflix.wsgi:application
+   # directory=/home/videoflix_backend
+   # user=root
+   # autostart=true
+   # autorestart=true
+   # stdout_logfile=/var/log/gunicorn/gunicorn_stdout.log
+   # stderr_logfile=/var/log/gunicorn/gunicorn_stderr.log
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+   Reload Supervisor and start Gunicorn.
+   sudo supervisorctl reread
+   sudo supervisorctl update
+   sudo supervisorctl start gunicorn
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+This completes the setup of the Videoflix Backend server.
+"""
