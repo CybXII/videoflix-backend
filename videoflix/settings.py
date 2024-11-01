@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = json.loads(os.getenv('ALLOWED_HOSTS', '[]'))
 
@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'videoflix_app',
     'rest_framework',
-    'debug_toolbar',
+    # 'debug_toolbar',
     'django_rq',
     'import_export',
     'corsheaders',
@@ -51,13 +51,11 @@ INSTALLED_APPS = [
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 
-DEBUG = True
-
 STATIC_ROOT = os.path.join(BASE_DIR, 'videoflix/static/staticfiles/')
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
