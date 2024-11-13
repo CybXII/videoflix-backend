@@ -1,34 +1,11 @@
-"""
-URL configuration for videoflix project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-from django.contrib import admin
 from django.urls import path, include
-# from debug_toolbar.toolbar import debug_toolbar_urls
-from videoflix_app.views import VideoView
-from django.conf.urls.static import static
-from videoflix import settings
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.contrib import admin
+from django.conf import settings
 
 urlpatterns = [
     path('videoflix/admin/', admin.site.urls),
-    path('videoflix/__debug__/', include('debug_toolbar.urls')),  # Debug Toolbar URLs
-    path('videoflix/videos/', VideoView.as_view(), name='video-detail'),
-] + staticfiles_urlpatterns()
+    path('videoflix/', include('videoflix_app.urls')),
+]
 
-# + debug_toolbar_urls()
-# urlpatterns += [
-#     path('django-rq/', include('django_rq.urls'))
-# ]
+if settings.DEBUG:
+    urlpatterns += path('videoflix/__debug__/', include('debug_toolbar.urls')),
