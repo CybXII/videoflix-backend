@@ -1,135 +1,82 @@
-# videoflix_backend
+Hi there 👋
+This is a Developer Akademie Group Work For the Videoflix App Portfolio Example 🍿🍿🍿
 
+🎬 Videoflix 🍿
+Welcome to Videoflix, a Netflix-inspired video streaming platform! This project is developed by Lukas, Alex, and Benjamin as part of our intensive full-stack developer training. We're using Angular 18 for the frontend and Django & Django Rest Framework for the backend, with a PostgreSQL database. The platform enables users to register, explore a video library, and stream videos with various quality options.
 
+🚀 Project Overview
+Videoflix aims to recreate the core features of popular streaming services with a focus on clean code, responsive design, and scalable architecture. Our goal is to deliver an intuitive and efficient user experience for managing and watching video content.
 
-## Getting started
+🔧 Tech Stack
+Frontend: Angular 18
+Backend: Django & Django Rest Framework
+Database: PostgreSQL
+Caching Layer: Redis
+Background Task Runner: Django RQ or Celery
+📋 Checklist - Definition of Done (DoD)
+Ensure Clean Code principles are followed
+Functions are no longer than 14 lines
+Each function performs one clear task
+All function and variable names follow the snake_case convention
+No unused variables or functions
+All commented-out code has been removed
+📑 Documentation
+Documentation is present
+A clear and concise README.md file exists
+🛠️ Django-Specific Requirements
+Views that return HTTP responses are in views.py
+Helper functions are located in functions.py or utils.py
+Unit tests are written, and there is at least 70% test coverage (use Django Nose)
+Code is PEP-8 compliant
+🖥️ Technical Requirements
+Backend and frontend are separated, communicating via a REST API
+PostgreSQL is used as the database
+Redis is set up as the caching layer
+Host the backend on a V-Server
+Ensure at least 80% test coverage for the backend
+The user interface is responsive across all screen sizes
+📜 Functional Requirements
+1. User Registration
+Users can register with an email and password
+A confirmation email is sent after registration
+Accounts must be activated before login
+General error messages are displayed for invalid input
+2. User Login & Logout
+Registered users can log in with their email and password
+Error messages are kept general to maintain security
+Users can reset their password via a "Forgot Password" option
+Users can log out securely
+3. Video Dashboard
+A dashboard displays a hero section with a featured video teaser
+Videos are grouped by genre
+Each video is displayed with a thumbnail and title
+4. Video Playback
+Video quality is automatically adjusted based on device and connection
+Users can manually choose resolutions (120p, 360p, 720p, 1080p)
+Basic controls: play, pause, forward, rewind, and full-screen
+5. Progress Tracking
+Playback progress is automatically saved
+Users are prompted to continue where they left off for partially watched videos
+6. Legal Information
+There are easily accessible links to the privacy policy and imprint in the footer
+⚡ Other Features
+Background tasks are handled with Django RQ or Celery
+We use Redis as a caching layer for faster performance
+💻 Developer Instructions
+Follow the steps below to set up the project:
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+Clone the repository: git clone https://github.com/videoflix/videoflix-app.git
+Navigate to the backend directory: cd backend
+Create a virtual environment and install dependencies: pip install -r requirements.txt
+Run database migrations: python manage.py migrate
+Start the backend server: python manage.py runserver
+Navigate to the frontend directory: cd ../frontend
+Install frontend dependencies: npm install
+Start the Angular frontend: ng serve
+🧪 Testing
+We have implemented unit tests for the backend, with at least 70% coverage.
+To run tests, execute: python manage.py test
+🎉 Fun Facts
+The VideoFlix crew loves 🍕 pizza and 🍔 burgers! We always brainstorm the best ideas over a good meal!
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.com/videoflix-49808/videoflix_backend.git
-git branch -M main
-git push -uf origin main
-```
-
-Videoflix Backend Server Setup Instructions
-
-1. Install ffmpeg
-   sudo apt-get install ffmpeg
-
-2. Install nginx
-   sudo apt-get install nginx
-
-3. Configure SSH Key for GitLab Access
-   Generate an SSH key to authenticate with GitLab. Replace example@example.com with your email.
-   cd /etc/ssh
-   ssh-keygen -t rsa -b 4096 -C "example@example.com"  # Press Enter through all prompts
-   cat /root/.ssh/id_rsa.pub  # Display the SSH key to add to GitLab
-
-4. Clone the Repository
-   In your home directory, clone the repository.
-   git clone git@gitlab.com:videoflix-49808/videoflix_backend.git
-
-5. Connect via SFTP with FileZilla
-   - Protocol: SFTP
-   - Host: 192.168.1.100 (replace with your server's IP)
-   - User: root
-   - Password: Server password  
-   OR configure private key for SSH:
-     - Open FileZilla Settings > SFTP and add the private key.
-
-6. Upload .env File
-   Copy the .env file from your local videoflix_backend project to the server via SFTP.
-
-7. Update IP in .env File
-   Open .env on the server and update the hostname to the server IP.
-   nano /home/videoflix_backend/.env  # Replace IP as necessary
-
-8. Install PostgreSQL
-   sudo apt install postgresql postgresql-contrib
-
-9. Configure PostgreSQL User
-   Login to PostgreSQL and set the password for the postgres user.
-   sudo -i -u postgres
-   psql
-   ALTER USER postgres WITH PASSWORD 'examplepassword';  # Replace with your password
-   CREATE DATABASE videoflix;  # Create the Videoflix database
-   \q  # Exit PostgreSQL console
-   exit  # Exit postgres user
-
-10. Setup Python Virtual Environment
-   apt install python3.12-venv
-   python3 -m venv /home/videoflix_backend/env  # Create virtual environment in project directory
-   source /home/videoflix_backend/env/bin/activate  # Activate virtual environment
-
-11. Install Requirements
-   Edit requirements.txt and install dependencies.
-   nano requirements.txt  # Remove problematic lines if necessary
-   pip install -r requirements.txt
-
-12. Migrate Database
-   python3 manage.py makemigrations
-   python3 manage.py migrate
-
-13. Update PostgreSQL Configuration for External Access
-   Edit PostgreSQL configuration files.
-   sudo nano /etc/postgresql/*/main/postgresql.conf  # Uncomment listen_addresses = '*'
-   sudo nano /etc/postgresql/16/main/pg_hba.conf  # Add at the end:
-   # host    videoflix       postgres        0.0.0.0/0               md5
-
-14. Restart PostgreSQL
-   sudo systemctl restart postgresql
-
-15. Install and Configure SSL with Certbot
-   sudo systemctl stop nginx
-   sudo certbot certonly --standalone -d example-backend.com -d www.example-backend.com
-   # Update nginx config with SSL details from Certbot
-   sudo systemctl start nginx
-
-16. Install and Configure Supervisor for Background Tasks
-   sudo apt update
-   sudo apt install supervisor
-
-   Edit configuration for rqworker:
-   sudo nano /etc/supervisor/conf.d/rqworker.conf
-   # Add:
-   # [program:rqworker]
-   # command=/home/videoflix_backend/env/bin/python /home/videoflix_backend/manage.py rqworker
-   # process_name=%(program_name)s_%(process_num)02d
-   # numprocs=3
-   # autostart=true
-   # autorestart=true
-   # stdout_logfile=/var/log/rqworker.log
-   # stderr_logfile=/var/log/rqworker_err.log
-
-   Reload and start Supervisor services.
-   sudo supervisorctl reread
-   sudo supervisorctl update
-   sudo supervisorctl start rqworker
-
-17. Configure Gunicorn with Supervisor
-   sudo nano /etc/supervisor/conf.d/gunicorn.conf
-   # Add:
-   # command=/home/videoflix_backend/env/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 videoflix.wsgi:application
-   # directory=/home/videoflix_backend
-   # user=root
-   # autostart=true
-   # autorestart=true
-   # stdout_logfile=/var/log/gunicorn/gunicorn_stdout.log
-   # stderr_logfile=/var/log/gunicorn/gunicorn_stderr.log
-
-   Reload Supervisor and start Gunicorn.
-   sudo supervisorctl reread
-   sudo supervisorctl update
-   sudo supervisorctl start gunicorn
-
-This completes the setup of the Videoflix Backend server.
-"""
+🧙 VideoFlix-Crew Developed by Lukas, Alex and Benjamin ;)
