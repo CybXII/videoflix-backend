@@ -18,9 +18,13 @@ jobs:
 
       - name: 📁 Prepare deployment files
         run: |
-          mkdir deploy
+          mkdir -p deploy
+          # Kopiere relevante Konfigurationsdateien
           cp backend.Dockerfile backend.entrypoint.sh docker-compose.yml requirements.txt .env deploy/
-          cp -r videoflix deploy/videoflix
+          
+          # Nur die relevanten Projekt-Ordner übertragen
+          rsync -av --exclude '__pycache__' videoflix/ deploy/videoflix/
+          rsync -av --exclude '__pycache__' videoflix_app/ deploy/videoflix_app/
 
       - name: 📤 Upload to VPS (Test-Verzeichnis)
         uses: appleboy/scp-action@v0.1.7
