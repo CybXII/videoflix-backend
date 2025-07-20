@@ -1,8 +1,13 @@
 FROM python:3.12-alpine
 
+# Optional, aber empfohlen
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 WORKDIR /app
 
-COPY . .
+# Nur requirements.txt zuerst – Docker Cache-Optimierung
+COPY requirements.txt .
 
 RUN apk update && \
     apk add --no-cache --upgrade bash && \
@@ -17,9 +22,14 @@ RUN apk update && \
         python3-dev && \
     pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
-    apk del .build-deps && \
-    chmod +x backend.entrypoint.sh
+    apk del .build-deps
+
+# Jetzt restliches Projekt rein
+COPY . .
+
+# Script ausführbar machen
+RUN chmod +x backend.entrypoint.sh
 
 EXPOSE 8000
 
-ENTRYPOINT [ "./backend.entrypoint.sh" ]
+ENTRYPOINT ["./backend.entrypoint.sh"]
