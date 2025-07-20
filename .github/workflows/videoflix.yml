@@ -38,15 +38,29 @@ jobs:
           strip_components: 1
           debug: true
 
-      - name: 🐳 Run Test Deployment via Docker Compose
+      - name: 🐳 Run Docker Compose on VPS
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
           script: |
             cd /home/videoflix-django-test
-            docker compose -f docker-compose.yml down --volumes || true
-            docker compose -f docker-compose.yml build --no-cache
-            docker compose -f docker-compose.yml up -d
+
+            # Compose neu starten
+            docker compose down --volumes || true
+            docker compose build --no-cache
+            docker compose up -d
+
+            # Warten bis Container vollständig gestartet ist
+            echo "⏳ Warte auf Container-Start..."
+            sleep 10
+
+            # Django Commands im Container ausführen
+            echo "⚙ Führe Django Management Commands aus..."
+            docker exec videoflix_test_web python manage.py migrate --noinput
+            docker exec videoflix_test_web python manage.py collectstatic --noinput
+
+            # Optional: Superuser automatisch anlegen (einmalig)
+            docker exec videoflix_test_web python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'adminpass')"
