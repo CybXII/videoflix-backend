@@ -1,0 +1,44 @@
+name: Videoflix CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 📁 Prepare deployment files
+        run: |
+          mkdir deploy
+          cp backend.Dockerfile backend.entrypoint.sh docker-compose.test.yml .env requirements.txt deploy/
+          cp -r videoflix deploy/videoflix
+
+      - name: 📤 Upload to VPS (Test-Verzeichnis)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          source: "deploy"
+          target: "/home/videoflix-django-test"
+          strip_components: 1
+          debug: true
+
+      - name: 🐳 Run Test Deployment via Docker Compose
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /home/videoflix-django
+            docker compose -f docker-compose.yml down --volumes || true
+            docker compose -f docker-compose.yml build --no-cache
+            docker compose -f docker-compose.yml up -d
