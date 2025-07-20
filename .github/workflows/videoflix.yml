@@ -15,7 +15,7 @@ jobs:
       - name: 📁 Prepare deployment files
         run: |
           mkdir deploy
-          cp backend.Dockerfile backend.entrypoint.sh docker-compose.test.yml .env requirements.txt deploy/
+          cp backend.Dockerfile backend.entrypoint.sh docker-compose.yml .env requirements.txt deploy/
           cp -r videoflix deploy/videoflix
 
       - name: 📤 Upload to VPS (Test-Verzeichnis)
