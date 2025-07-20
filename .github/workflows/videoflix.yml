@@ -21,6 +21,7 @@ jobs:
           mkdir -p deploy
           # Kopiere relevante Konfigurationsdateien
           cp backend.Dockerfile backend.entrypoint.sh docker-compose.yml requirements.txt .env deploy/
+          cp manage.py deploy/ 
           
           # Nur die relevanten Projekt-Ordner übertragen
           rsync -av --exclude '__pycache__' videoflix/ deploy/videoflix/
@@ -55,7 +56,7 @@ jobs:
 
             # Warten bis Container vollständig gestartet ist
             echo "⏳ Warte auf Container-Start..."
-            sleep 10
+            sleep 30
 
             # Django Commands im Container ausführen
             echo "⚙ Führe Django Management Commands aus..."
