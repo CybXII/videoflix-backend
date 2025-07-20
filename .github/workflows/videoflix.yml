@@ -11,13 +11,6 @@ jobs:
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
-        
-      - name: 🛡️ Check SSH Port Secret
-        run: |
-          if [ -z "${{ secrets.PORT }}" ]; then
-            echo "❌ SSH PORT is not set in GitHub Secrets!"
-            exit 1
-          fi
 
       - name: 🔐 Generate .env file from GitHub Secret
         run: |
@@ -34,7 +27,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT || 22 }}
+          port: 22
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "deploy"
           target: "/home/videoflix-django-test"
@@ -46,7 +39,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT || 22 }}
+          port: 22
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/videoflix-django-test
