@@ -19,10 +19,12 @@ jobs:
       - name: 📁 Prepare deployment files
         run: |
           mkdir -p deploy
-          # Kopiere relevante Konfigurationsdateien
+
+          chmod +x backend.entrypoint.sh
+
           cp backend.Dockerfile backend.entrypoint.sh docker-compose.yml requirements.txt .env deploy/
           cp manage.py deploy/ 
-          
+
           # Nur die relevanten Projekt-Ordner übertragen
           rsync -av --exclude '__pycache__' videoflix/ deploy/videoflix/
           rsync -av --exclude '__pycache__' videoflix_app/ deploy/videoflix_app/
