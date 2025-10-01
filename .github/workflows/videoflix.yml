@@ -58,11 +58,10 @@ jobs:
             sleep 20
 
             echo "🔎 Prüfe/erstelle Videoflix-Datenbank..."
-            if ! # --- Videoflix DB sicherstellen ---
-              docker exec -i postgres-main psql -U ${{ secrets.POSTGRES_USER }} -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='videoflix'" | grep -q 1 \
-                || docker exec -i postgres-main psql -U ${{ secrets.POSTGRES_USER }} -d postgres -c "CREATE DATABASE videoflix OWNER ${{ secrets.POSTGRES_USER }};"W
-            fi
-            
+
+            docker exec -i postgres-main psql -U ${{ secrets.POSTGRES_USER }} -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='videoflix'" | grep -q 1 \
+              || docker exec -i postgres-main psql -U ${{ secrets.POSTGRES_USER }} -d postgres -c "CREATE DATABASE videoflix OWNER ${{ secrets.POSTGRES_USER }};"
+
             echo "⚙ Führe Django Management Commands aus..."
             docker exec videoflix_backend python manage.py migrate --noinput
             docker exec videoflix_backend python manage.py collectstatic --noinput
