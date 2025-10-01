@@ -10,7 +10,7 @@ jobs:
     env:
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      
+
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
@@ -63,6 +63,14 @@ jobs:
             echo "🔎 Prüfe/erstelle Videoflix-Datenbank..."
             docker exec -i postgres-main psql -U $POSTGRES_USER -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='videoflix'" | grep -q 1 \
               || docker exec -i postgres-main psql -U $POSTGRES_USER -d postgres -c "CREATE DATABASE videoflix OWNER $POSTGRES_USER;"
+
+            echo "⚙ Prüfe ob Migrationen existieren..."
+            if ! docker exec videoflix_backend ls videoflix_app/migrations/*.py >/dev/null 2>&1; then
+              echo "📦 Keine Migrationen gefunden – erstelle neue."
+              docker exec videoflix_backend python manage.py makemigrations --noinput
+            else
+              echo "✅ Migrationen vorhanden – überspringe makemigrations."
+            fi
 
             echo "⚙ Führe Django Management Commands aus..."
             docker exec videoflix_backend python manage.py migrate --noinput
