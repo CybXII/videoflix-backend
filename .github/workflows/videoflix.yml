@@ -46,6 +46,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
+          envs: POSTGRES_USER,POSTGRES_PASSWORD,DJANGO_SUPERUSER_USERNAME,DJANGO_SUPERUSER_EMAIL,DJANGO_SUPERUSER_PASSWORD
           script: |
             cd /home/cybxii/videoflix-backend
 
@@ -53,18 +54,16 @@ jobs:
             docker compose down --remove-orphans || true
             docker compose build
             docker compose up -d
-
             echo "⏳ Warte auf Container-Start..."
             sleep 20
 
             echo "🔎 Prüfe/erstelle Videoflix-Datenbank..."
-
-            docker exec -i postgres-main psql -U ${{ secrets.POSTGRES_USER }} -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='videoflix'" | grep -q 1 \
-              || docker exec -i postgres-main psql -U ${{ secrets.POSTGRES_USER }} -d postgres -c "CREATE DATABASE videoflix OWNER ${{ secrets.POSTGRES_USER }};"
+            docker exec -i postgres-main psql -U $POSTGRES_USER -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='videoflix'" | grep -q 1 \
+              || docker exec -i postgres-main psql -U $POSTGRES_USER -d postgres -c "CREATE DATABASE videoflix OWNER $POSTGRES_USER;"
 
             echo "⚙ Führe Django Management Commands aus..."
             docker exec videoflix_backend python manage.py migrate --noinput
             docker exec videoflix_backend python manage.py collectstatic --noinput
 
             echo "👤 Superuser prüfen/erstellen..."
-            docker exec videoflix_backend python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='${{ secrets.DJANGO_SUPERUSER_USERNAME }}').exists() or User.objects.create_superuser('${{ secrets.DJANGO_SUPERUSER_USERNAME }}', '${{ secrets.DJANGO_SUPERUSER_EMAIL }}', '${{ secrets.DJANGO_SUPERUSER_PASSWORD }}')"
+            docker exec videoflix_backend python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='$DJANGO_SUPERUSER_USERNAME').exists() or User.objects.create_superuser('$DJANGO_SUPERUSER_USERNAME', '$DJANGO_SUPERUSER_EMAIL', '$DJANGO_SUPERUSER_PASSWORD')"
