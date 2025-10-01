@@ -37,7 +37,7 @@ jobs:
           port: ${{ secrets.PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "deploy"
-          target: "/home/videoflix-django-test"
+          target: "/home/cybxii/videoflix-backend"
           strip_components: 1
           debug: true
 
@@ -49,7 +49,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            cd /home/videoflix-django-test
+            cd /home/cybxii/videoflix-backend
 
             # Compose neu starten
             docker compose down --volumes || true
