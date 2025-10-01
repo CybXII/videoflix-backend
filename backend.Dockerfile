@@ -10,6 +10,7 @@ RUN apt-get update && \
         bash \
         build-essential \
         libpq-dev \
+        postgresql-client \   # <-- HINZUGEFÜGT, liefert pg_isready
         ffmpeg \
         libssl-dev \
         libffi-dev \
