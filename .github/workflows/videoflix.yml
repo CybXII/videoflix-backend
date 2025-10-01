@@ -62,8 +62,8 @@ jobs:
 
             # Django Commands im Container ausführen
             echo "⚙ Führe Django Management Commands aus..."
-            docker exec videoflix_test_web python manage.py migrate --noinput
-            docker exec videoflix_test_web python manage.py collectstatic --noinput
+            docker exec videoflix_backend  python manage.py migrate --noinput
+            docker exec videoflix_backend  python manage.py collectstatic --noinput
 
             # Optional: Superuser automatisch anlegen (einmalig)
-            docker exec videoflix_test_web python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'adminpass')"
+            docker exec videoflix_backend  python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'adminpass')"
