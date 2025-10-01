@@ -4,13 +4,12 @@ WORKDIR /app
 
 COPY . .
 
-# Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         bash \
         build-essential \
         libpq-dev \
-        postgresql-client \   # <-- HINZUGEFÜGT, liefert pg_isready
+        postgresql-client \
         ffmpeg \
         libssl-dev \
         libffi-dev \
