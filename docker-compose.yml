@@ -26,18 +26,10 @@ services:
       - vpsdb
     labels:
       - "traefik.enable=true"
-
-      # Haupt-Router für Django API/Admin
       - "traefik.http.routers.videoflix.rule=Host(`videoflix.luft-alex.de`)"
       - "traefik.http.routers.videoflix.entrypoints=websecure"
       - "traefik.http.routers.videoflix.tls.certresolver=letsencrypt"
       - "traefik.http.services.videoflix.loadbalancer.server.port=8000"
-
-      # Middleware für CORS
-      - "traefik.http.middlewares.videoflix-cors.headers.accessControlAllowOriginList=https://videoflix.luft-alexander.de"
-      - "traefik.http.middlewares.videoflix-cors.headers.accessControlAllowMethods=GET,OPTIONS,PUT,POST,PATCH,DELETE"
-      - "traefik.http.middlewares.videoflix-cors.headers.accessControlAllowHeaders=Content-Type,Authorization"
-      - "traefik.http.routers.videoflix.middlewares=videoflix-cors"
 
 volumes:
   redis_data:
