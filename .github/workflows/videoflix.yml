@@ -7,7 +7,10 @@ on:
 jobs:
   build-and-test-deploy:
     runs-on: ubuntu-latest
-
+    env:
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      
     steps:
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
