@@ -27,9 +27,10 @@ services:
       - vpsdb
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.videoflix.rule=Host(`videoflix.luft-alex.de`)"
+      - "traefik.http.routers.videoflix.rule=Host(`${VIDEOFILX_HOST}`)"
       - "traefik.http.routers.videoflix.entrypoints=websecure"
       - "traefik.http.routers.videoflix.tls.certresolver=myresolver"
+      - "traefik.http.services.videoflix.loadbalancer.server.port=8000"
 
 volumes:
   redis_data:
