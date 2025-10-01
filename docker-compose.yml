@@ -8,7 +8,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - traefik-net
+      - proxy
 
   web:
     build:
@@ -23,7 +23,7 @@ services:
     depends_on:
       - redis
     networks:
-      - traefik-net
+      - proxy
       - vpsdb
     labels:
       - "traefik.enable=true"
@@ -39,5 +39,5 @@ volumes:
 networks:
   vpsdb:
     external: true
-  traefik-net:
+  proxy:
     external: true
