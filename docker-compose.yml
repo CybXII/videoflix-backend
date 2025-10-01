@@ -33,16 +33,6 @@ services:
       - "traefik.http.routers.videoflix.tls.certresolver=letsencrypt"
       - "traefik.http.services.videoflix.loadbalancer.server.port=8000"
 
-      # Router für STATIC-Files
-      - "traefik.http.routers.videoflix-static.rule=Host(`videoflix.luft-alex.de`) && PathPrefix(`/static`)"
-      - "traefik.http.routers.videoflix-static.entrypoints=websecure"
-      - "traefik.http.services.videoflix-static.loadbalancer.server.port=8000"
-
-      # Router für MEDIA-Files
-      - "traefik.http.routers.videoflix-media.rule=Host(`videoflix.luft-alex.de`) && PathPrefix(`/media`)"
-      - "traefik.http.routers.videoflix-media.entrypoints=websecure"
-      - "traefik.http.services.videoflix-media.loadbalancer.server.port=8000"
-
       # Middleware für CORS
       - "traefik.http.middlewares.videoflix-cors.headers.accessControlAllowOriginList=https://videoflix.luft-alexander.de"
       - "traefik.http.middlewares.videoflix-cors.headers.accessControlAllowMethods=GET,OPTIONS,PUT,POST,PATCH,DELETE"
