@@ -65,11 +65,11 @@ jobs:
               || docker exec -i postgres-main psql -U $POSTGRES_USER -d postgres -c "CREATE DATABASE videoflix OWNER $POSTGRES_USER;"
 
             echo "⚙ Prüfe ob Migrationen existieren..."
-            if ! docker exec videoflix_backend ls videoflix_app/migrations/*.py >/dev/null 2>&1; then
-              echo "📦 Keine Migrationen gefunden – erstelle neue."
+            if ! docker exec videoflix_backend sh -c "ls videoflix_app/migrations/[0-9]*.py >/dev/null 2>&1"; then
+              echo "📦 Keine echten Migrationen gefunden – erstelle neue."
               docker exec videoflix_backend python manage.py makemigrations --noinput
             else
-              echo "✅ Migrationen vorhanden – überspringe makemigrations."
+              echo "✅ Echte Migrationen vorhanden – überspringe makemigrations."
             fi
 
             echo "⚙ Führe Django Management Commands aus..."
