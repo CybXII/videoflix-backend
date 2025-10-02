@@ -25,6 +25,8 @@ jobs:
       - name: 📁 Prepare deployment files
         run: |
           mkdir -p deploy
+          mkdir -p /home/${{ secrets.USERNAME }}/videoflix-backend
+
           chmod +x backend.entrypoint.sh
 
           cp backend.Dockerfile backend.entrypoint.sh docker-compose.yml requirements.txt .env manage.py deploy/
