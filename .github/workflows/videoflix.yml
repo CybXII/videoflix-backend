@@ -44,6 +44,7 @@ jobs:
           target: "/home/cybxii/videoflix-backend"
           strip_components: 1
           debug: true
+          overwrite: true
 
       - name: 🐳 Run Docker Compose on VPS
         uses: appleboy/ssh-action@v1.0.0
