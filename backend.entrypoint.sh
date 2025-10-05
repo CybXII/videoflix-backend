@@ -13,6 +13,10 @@ done
 
 echo "PostgreSQL ist bereit - fahre fort..."
 
+mkdir -p /media /static
+chown -R 1000:1000 /media /static
+chmod -R 775 /media /static
+
 # Deine originalen Befehle (ohne wait_for_db)
 python manage.py collectstatic --noinput
 python manage.py makemigrations
