@@ -2,6 +2,9 @@ services:
   redis:
     image: redis:latest
     container_name: videoflix_redis
+    command: ["sh", "-c", "exec redis-server --requirepass \"$${REDIS_PASSWORD}\""]
+    env_file:
+      - .env
     ports:
       - "6380:6379"
     volumes:
