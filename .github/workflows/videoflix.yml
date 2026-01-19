@@ -91,7 +91,33 @@ jobs:
 
             echo "👤 Superuser prüfen/erstellen..."
             if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_EMAIL" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
-              docker exec videoflix_backend python manage.py shell -c "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.filter(username='$DJANGO_SUPERUSER_USERNAME').exists() or User.objects.create_superuser('$DJANGO_SUPERUSER_USERNAME', '$DJANGO_SUPERUSER_EMAIL', '$DJANGO_SUPERUSER_PASSWORD')"
+              docker exec \
+                -e DJANGO_SUPERUSER_USERNAME="$DJANGO_SUPERUSER_USERNAME" \
+                -e DJANGO_SUPERUSER_EMAIL="$DJANGO_SUPERUSER_EMAIL" \
+                -e DJANGO_SUPERUSER_PASSWORD="$DJANGO_SUPERUSER_PASSWORD" \
+                videoflix_backend \
+                python manage.py shell -c "
+            import os
+            from django.contrib.auth import get_user_model
+            from django.db import IntegrityError, transaction
+
+            User = get_user_model()
+            username = os.environ['DJANGO_SUPERUSER_USERNAME'].strip()
+            email = os.environ['DJANGO_SUPERUSER_EMAIL'].strip().lower()
+            password = os.environ['DJANGO_SUPERUSER_PASSWORD']
+
+            try:
+                with transaction.atomic():
+                    user = User.objects.filter(email=email).first()
+                    if user:
+                        print(f'Superuser already exists: {email} (skip)')
+                    else:
+                        User.objects.create_superuser(username, email, password)
+                        print(f'Created superuser: {email}')
+            except IntegrityError as e:
+                print(f'Superuser creation skipped due to IntegrityError: {e}')
+            "
             else
               echo "⚠️ Superuser-Variablen nicht gesetzt – überspringe."
             fi
+
