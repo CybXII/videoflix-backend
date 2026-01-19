@@ -2,7 +2,7 @@ name: Videoflix CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ] 
 
 jobs:
   build-and-test-deploy:
