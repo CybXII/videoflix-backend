@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import TokenAuthentication
 from videoflix_app.models import User, Video, UserContinueWatchVideo, UserFavoriteVideo
+from django.conf import settings
 import os
 
 def activate_user(request, uidb64, token):
@@ -95,8 +96,14 @@ def user_continue_watching(request):
                     "description": video.description,
                     "category": video.category,
                     "created_at": video.created_at,
-                    "video_file": video.video_file.url.replace('/media/', '') if video.video_file else None,
-                    "thumbnail": video.thumbnail.url.replace('/media/', '') if video.thumbnail else None,
+                    "video_file": (
+                        f"{os.getenv('PUBLIC_MEDIA_URL', settings.MEDIA_URL)}{video.video_file.name}"
+                        if video.video_file else None
+                    ),
+                    "thumbnail": (
+                        f"{os.getenv('PUBLIC_MEDIA_URL', settings.MEDIA_URL)}{video.thumbnail.name}"
+                        if video.thumbnail else None
+                    ),
                 },
                 "timestamp": next(
                     (cw.timestamp for cw in continue_watch_videos if cw.video_id == video.id), None

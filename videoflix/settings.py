@@ -54,10 +54,10 @@ IMPORT_EXPORT_USE_TRANSACTIONS = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/videoflix/static/'
 STATIC_ROOT = '/static'   # passt zum Volume in Compose
 
-MEDIA_URL = '/media/'
+MEDIA_URL = '/videoflix/media/'
 MEDIA_ROOT = '/media'     # passt zum Volume in Compose
 
 MIDDLEWARE = [

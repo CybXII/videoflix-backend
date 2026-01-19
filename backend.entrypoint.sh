@@ -25,19 +25,43 @@ python manage.py migrate
 # Create a superuser using environment variables
 # (Dein Superuser-Erstellungs-Code bleibt gleich)
 python manage.py shell <<'EOF'
-from django.contrib.auth import get_user_model
 import os
+from django.contrib.auth import get_user_model
+from django.db import IntegrityError, transaction
 
 User = get_user_model()
-username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
-email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@example.com')
-password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'adminpassword')
 
-if not User.objects.filter(email=email).exists():
-    print(f"Creating superuser '{email}' ...")
-    User.objects.create_superuser(username=username, email=email, password=password)
-else:
-    print(f"Superuser '{email}' already exists, skipping creation.")
+username = (os.environ.get('DJANGO_SUPERUSER_USERNAME') or 'admin').strip()
+email = (os.environ.get('DJANGO_SUPERUSER_EMAIL') or 'admin@example.com').strip().lower()
+password = os.environ.get('DJANGO_SUPERUSER_PASSWORD') or 'adminpassword'
+
+try:
+    with transaction.atomic():
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={'username': username}
+        )
+
+    if created:
+        user.set_password(password)
+        user.is_staff = True
+        user.is_superuser = True
+        user.is_active = True
+        user.save(update_fields=['password','is_staff','is_superuser','is_active'])
+        print(f"Created superuser: {email}")
+    else:
+        updated = False
+        if not user.is_staff:
+            user.is_staff = True
+            updated = True
+        if not user.is_superuser:
+            user.is_superuser = True
+            updated = True
+        if updated:
+            user.save(update_fields=['is_staff','is_superuser'])
+        print(f"Superuser already exists: {email}")
+except IntegrityError as e:
+    print(f"Superuser creation skipped due to IntegrityError: {e}")
 EOF
 
 python manage.py rqworker default &

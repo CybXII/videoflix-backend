@@ -29,10 +29,37 @@ services:
       - vpsdb
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.videoflix.rule=Host(`videoflix.luft-alex.de`)"
+      - "traefik.http.routers.videoflix.rule=Host(`videoflix.luft-alex.de`) && !PathPrefix(`/videoflix/media`)"
       - "traefik.http.routers.videoflix.entrypoints=websecure"
       - "traefik.http.routers.videoflix.tls.certresolver=letsencrypt"
       - "traefik.http.services.videoflix.loadbalancer.server.port=8000"
+
+  media:
+    image: nginx:alpine
+    container_name: videoflix_media
+    restart: unless-stopped
+    volumes:
+      - ./media:/usr/share/nginx/html/media:ro
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.videoflix-media.rule=Host(`videoflix.luft-alex.de`) && PathPrefix(`/videoflix/media`)"
+      - "traefik.http.routers.videoflix-media.entrypoints=websecure"
+      - "traefik.http.routers.videoflix-media.tls.certresolver=letsencrypt"
+      - "traefik.http.services.videoflix-media.loadbalancer.server.port=80"
+
+      # Pfad-Umwandlung (entfernt /videoflix)
+      - "traefik.http.middlewares.strip-videoflix-media.stripprefix.prefixes=/videoflix"
+
+      # ✅ CORS-Header hinzufügen
+      - "traefik.http.middlewares.videoflix-cors.headers.accessControlAllowOriginList=https://videoflix.luft-alexander.de"
+      - "traefik.http.middlewares.videoflix-cors.headers.accessControlAllowMethods=GET,OPTIONS"
+      - "traefik.http.middlewares.videoflix-cors.headers.accessControlAllowHeaders=Origin,Accept,Authorization,Content-Type"
+      - "traefik.http.middlewares.videoflix-cors.headers.addVaryHeader=true"
+
+      # Kombiniere beide Middlewares
+      - "traefik.http.routers.videoflix-media.middlewares=strip-videoflix-media,videoflix-cors"
 
 volumes:
   redis_data:
